@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Tru by Hilton Orlando Convention Center World Cup Challenge</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand-lockup">
+        <div class="brand-mark" aria-hidden="true">tru</div>
+        <div>
+          <p class="eyebrow">by Hilton Orlando Convention Center</p>
+          <h1>FIFA World Cup 2026 Staff Bracket Challenge</h1>
+        </div>
+      </div>
+      <div class="prize-strip" aria-label="Challenge prizes">
+        <span><strong>$100</strong> winner</span>
+        <span><strong>$50</strong> runner-up</span>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="hero-copy">
+          <p class="date" id="challengeStatus">Entries open</p>
+          <h2><span>FIFA</span> <span>World Cup 2026</span> <mark>Staff Bracket Challenge!</mark></h2>
+          <p>
+            Think you know soccer? Join the fun, compete against fellow team members, and let the app track every pick, point, winner, and runner-up automatically.
+          </p>
+        </div>
+        <div class="hero-ball" aria-hidden="true">⚽</div>
+        <div class="score-card" aria-label="Scoring rules">
+          <div class="brand-mini">tru</div>
+          <h3>Automated Challenge Desk</h3>
+          <dl>
+            <div><dt>Entries</dt><dd id="entryCount">0</dd></div>
+            <div><dt>Results complete</dt><dd id="resultsProgress">0%</dd></div>
+            <div><dt>Time until lock</dt><dd id="countdown">--</dd></div>
+            <div><dt>Auto scoring</dt><dd>On</dd></div>
+          </dl>
+        </div>
+      </section>
+
+      <section class="automation-strip" aria-label="Automated challenge summary">
+        <article>
+          <span>Current Leader</span>
+          <strong id="leaderName">No entries yet</strong>
+        </article>
+        <article>
+          <span>Runner-Up</span>
+          <strong id="runnerName">No entries yet</strong>
+        </article>
+        <article>
+          <span>Prize Tracking</span>
+          <strong>$100 winner / $50 runner-up</strong>
+        </article>
+        <article>
+          <span>Deadline</span>
+          <strong id="entryMode">Open</strong>
+        </article>
+      </section>
+
+      <nav class="tabs" aria-label="Challenge sections">
+        <button class="tab active" type="button" data-tab="entry">Staff Entries</button>
+        <button class="tab" type="button" data-tab="score">Automated Scoreboard</button>
+        <button class="tab" type="button" data-tab="knockout">Knockout Round</button>
+      </nav>
+
+      <section id="entry" class="panel active" aria-labelledby="entry-heading">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Step 1</p>
+            <h2 id="entry-heading">Group Stage Picks</h2>
+          </div>
+          <div class="actions">
+            <button type="button" id="newEntry">New Entry</button>
+            <button type="button" id="resetPicks">Reset</button>
+            <button type="button" id="saveEntry" class="primary">Submit Entry</button>
+          </div>
+        </div>
+
+        <div class="entry-fields">
+          <label class="name-field">
+            <span>Staff member</span>
+            <input id="playerName" type="text" placeholder="Enter name">
+          </label>
+          <label class="name-field">
+            <span>Rooting for</span>
+            <input id="rootingFor" type="text" placeholder="Country" list="teamOptions">
+          </label>
+        </div>
+        <datalist id="teamOptions"></datalist>
+        <p class="status-line" id="entryStatus" role="status"></p>
+
+        <div class="groups-grid" id="groupsGrid"></div>
+
+        <div class="advance-box">
+          <div>
+            <p class="eyebrow">Step 2</p>
+            <h2>Pick 8 Third-Place Teams to Advance</h2>
+          </div>
+          <p class="muted">Your current 3rd-place picks appear below. Select exactly eight.</p>
+          <div class="third-place-list" id="thirdPlaceList"></div>
+        </div>
+
+        <div class="advance-box">
+          <div class="section-head nested">
+            <div>
+              <p class="eyebrow">Saved Entries</p>
+              <h2>Staff Entries</h2>
+            </div>
+            <button type="button" id="exportEntries">Export CSV</button>
+          </div>
+          <div class="entries-table-wrap">
+            <table class="entries-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Rooting For</th>
+                  <th>3rd Advancers</th>
+                  <th>Score</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="entriesTable"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section id="score" class="panel" aria-labelledby="score-heading">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Automated Scoring</p>
+            <h2 id="score-heading">Results & Leaderboard</h2>
+          </div>
+          <div class="actions">
+            <button type="button" id="copySummary">Copy Summary</button>
+          </div>
+        </div>
+        <p class="muted">
+          Enter the actual group finishes after the group stage. The app compares results to every saved staff entry and updates the leaderboard automatically.
+        </p>
+        <div class="score-layout">
+          <div>
+            <div class="groups-grid compact" id="resultsGrid"></div>
+            <div class="advance-box">
+              <div>
+                <p class="eyebrow">Official Advancers</p>
+                <h2>Actual 3rd-Place Teams to Advance</h2>
+              </div>
+              <p class="muted">After the group stage, select the eight third-place teams that move on.</p>
+              <div class="third-place-list" id="actualThirdPlaceList"></div>
+            </div>
+          </div>
+          <aside class="total-box">
+            <h3>Leaderboard</h3>
+            <div class="winner-box">
+              <span>Winner</span>
+              <strong id="winnerPrize">Pending</strong>
+              <small>$100 gift card</small>
+            </div>
+            <div class="winner-box">
+              <span>Runner-Up</span>
+              <strong id="runnerPrize">Pending</strong>
+              <small>$50 gift card</small>
+            </div>
+            <div class="leaderboard" id="leaderboard"></div>
+          </aside>
+        </div>
+      </section>
+
+      <section id="knockout" class="panel" aria-labelledby="knockout-heading">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Second Challenge</p>
+            <h2 id="knockout-heading">Knockout Bracket Plan</h2>
+          </div>
+          <button type="button" id="printKnockout" class="primary">Print Rules</button>
+        </div>
+        <div class="rounds">
+          <article>
+            <span>Round of 32</span>
+            <strong>1 point per correct pick</strong>
+          </article>
+          <article>
+            <span>Round of 16</span>
+            <strong>2 points per correct pick</strong>
+          </article>
+          <article>
+            <span>Quarterfinals</span>
+            <strong>4 points per correct pick</strong>
+          </article>
+          <article>
+            <span>Semifinals</span>
+            <strong>6 points per correct pick</strong>
+          </article>
+          <article>
+            <span>Final</span>
+            <strong>10 points for champion</strong>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <template id="groupTemplate">
+      <article class="group-card">
+        <div class="group-title">
+          <h3></h3>
+          <span>Drag to rank</span>
+        </div>
+        <ol class="team-list"></ol>
+      </article>
+    </template>
+
+    <script src="app.js"></script>
+  </body>
+</html>
