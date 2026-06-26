@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Tru FIFA World Cup 2026 Knockout Bracket</title>
+    <link rel="stylesheet" href="knockout.css">
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand-lockup">
+        <div class="brand-mark" aria-hidden="true">tru</div>
+        <div>
+          <p class="eyebrow">by Hilton Orlando Convention Center</p>
+          <h1>FIFA World Cup 2026 Knockout Bracket</h1>
+        </div>
+      </div>
+      <a class="top-link" href="index.html">Group Tracker</a>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="hero-copy">
+          <p class="date" id="syncStatus">Local mode</p>
+          <h2><span>Knockout</span> <span>Bracket Challenge</span></h2>
+          <p>Submit your bracket, scan the QR code later, and check your status as each knockout round is scored.</p>
+        </div>
+        <div class="hero-ball" aria-hidden="true">⚽</div>
+        <div class="score-card">
+          <h3>Scoring</h3>
+          <dl>
+            <div><dt>Round of 32</dt><dd>1 pt</dd></div>
+            <div><dt>Round of 16</dt><dd>2 pts</dd></div>
+            <div><dt>Quarterfinals</dt><dd>4 pts</dd></div>
+            <div><dt>Semifinals</dt><dd>6 pts</dd></div>
+            <div><dt>Champion</dt><dd>10 pts</dd></div>
+          </dl>
+        </div>
+      </section>
+
+      <section class="stats-strip">
+        <article><span>Entries</span><strong id="entryCount">0</strong></article>
+        <article><span>Leader</span><strong id="leaderName">No entries yet</strong></article>
+        <article><span>Champion Pick</span><strong id="championPick">Pending</strong></article>
+        <article><span>Results Progress</span><strong id="resultsProgress">0%</strong></article>
+      </section>
+
+      <nav class="tabs" aria-label="Knockout sections">
+        <button class="tab active" type="button" data-tab="entry">Fill Bracket</button>
+        <button class="tab" type="button" data-tab="status">Status</button>
+        <button class="tab" type="button" data-tab="manager">Manager</button>
+        <button class="tab" type="button" data-tab="qr">QR Code</button>
+      </nav>
+
+      <section id="entry" class="panel active">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Participant Entry</p>
+            <h2>Fill Out Your Bracket</h2>
+          </div>
+          <div class="actions">
+            <button type="button" id="clearBracket">Clear</button>
+            <button type="button" id="saveBracket" class="primary">Submit Bracket</button>
+          </div>
+        </div>
+
+        <div class="entry-fields">
+          <label class="name-field">
+            <span>Name</span>
+            <input id="participantName" type="text" placeholder="Enter your name">
+          </label>
+          <label class="name-field">
+            <span>Rooting for</span>
+            <input id="rootingFor" type="text" placeholder="Optional">
+          </label>
+        </div>
+        <p class="status-line" id="entryStatus" role="status"></p>
+        <div class="bracket-board" id="entryBracket"></div>
+      </section>
+
+      <section id="status" class="panel">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Live Standings</p>
+            <h2>Participant Status</h2>
+          </div>
+          <button type="button" id="copyStandings">Copy Standings</button>
+        </div>
+        <div class="status-layout">
+          <div class="leaderboard" id="leaderboard"></div>
+          <aside class="detail-box">
+            <h3>Official Champion</h3>
+            <strong id="officialChampion">Pending</strong>
+            <p class="muted">Scores update when manager results are entered.</p>
+          </aside>
+        </div>
+      </section>
+
+      <section id="manager" class="panel">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Manager Setup</p>
+            <h2>Matchups & Official Results</h2>
+          </div>
+          <button type="button" id="saveTeams" class="primary">Save Matchups</button>
+        </div>
+        <div class="manager-grid">
+          <section class="manager-card">
+            <h3>Round of 32 Teams</h3>
+            <p class="muted">Enter teams in matchup order: 1 vs 2, 3 vs 4, and so on.</p>
+            <div class="team-setup" id="teamSetup"></div>
+          </section>
+          <section class="manager-card">
+            <h3>Official Winners</h3>
+            <p class="muted">Choose the actual winner for each matchup as the tournament progresses.</p>
+            <div class="bracket-board manager-board" id="officialBracket"></div>
+          </section>
+        </div>
+      </section>
+
+      <section id="qr" class="panel">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Share Link</p>
+            <h2>QR Code For Participants</h2>
+          </div>
+          <button type="button" id="printQr" class="primary">Print QR</button>
+        </div>
+        <div class="qr-layout">
+          <label class="name-field">
+            <span>Website URL</span>
+            <input id="qrUrl" type="url" placeholder="Paste your GitHub Pages link">
+          </label>
+          <div class="qr-card">
+            <img id="qrImage" alt="QR code for the knockout bracket app">
+            <p id="qrCaption">Paste your website link to generate a QR code.</p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="knockout.js"></script>
+  </body>
+</html>

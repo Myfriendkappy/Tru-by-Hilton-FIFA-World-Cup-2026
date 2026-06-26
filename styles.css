@@ -46,6 +46,15 @@ button {
   font-weight: 700;
 }
 
+.top-link {
+  align-items: center;
+  border-radius: 8px;
+  display: inline-flex;
+  min-height: 42px;
+  padding: 0 14px;
+  text-decoration: none;
+}
+
 button:hover {
   border-color: var(--blue);
 }

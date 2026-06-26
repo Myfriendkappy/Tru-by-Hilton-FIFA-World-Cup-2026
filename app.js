@@ -69,6 +69,17 @@ const challengeLockDate = new Date("2026-06-11T00:00:00-04:00");
 const appKey = "tru-world-cup-app-v2";
 const legacyDraftKey = "tru-world-cup-bracket";
 const legacyResultsKey = "tru-world-cup-results";
+const firebaseStatus = {
+  enabled: false,
+  ready: false,
+  db: null,
+  trackerId: "world-cup-2026",
+  ignoreNextRemoteEntries: false,
+  ignoreNextRemoteResults: false,
+  applyingRemote: false,
+  entriesUnsubscribe: null,
+  resultsUnsubscribe: null,
+};
 
 const freshPicks = () => Object.fromEntries(Object.entries(groups).map(([letter, teams]) => [letter, [...teams]]));
 const freshResults = () => Object.fromEntries(Object.keys(groups).map((letter) => [letter, ["", "", "", ""]]));
@@ -111,6 +122,7 @@ renderEntriesTable();
 renderResults();
 renderLeaderboard();
 updateAutomationDashboard();
+initializeFirebaseSync();
 setInterval(updateAutomationDashboard, 60000);
 
 document.querySelectorAll(".tab").forEach((tab) => {
@@ -123,13 +135,13 @@ document.querySelectorAll(".tab").forEach((tab) => {
 
 playerName.addEventListener("input", () => {
   appState.draft.playerName = playerName.value.trim();
-  setStatus("Draft auto-saved.");
+  setStatus("Draft saved for your tracker.");
   saveApp();
 });
 
 rootingFor.addEventListener("input", () => {
   appState.draft.rootingFor = rootingFor.value.trim();
-  setStatus("Draft auto-saved.");
+  setStatus("Draft saved for your tracker.");
   saveApp();
 });
 
@@ -138,7 +150,7 @@ document.querySelector("#newEntry").addEventListener("click", () => {
   hydrateDraftFields();
   renderPickGroups();
   renderThirdPlaceChoices();
-  setStatus("Ready for the next staff member.");
+  setStatus("Ready to enter the next staff pick.");
   saveApp();
 });
 
@@ -174,7 +186,7 @@ document.querySelector("#saveEntry").addEventListener("click", () => {
     setStatus(`${entry.playerName}'s entry was updated.`);
   } else {
     appState.entries.push(entry);
-    setStatus(`${entry.playerName}'s entry was submitted.`);
+    setStatus(`${entry.playerName}'s entry was saved.`);
   }
 
   appState.draft = freshDraft();
@@ -183,6 +195,7 @@ document.querySelector("#saveEntry").addEventListener("click", () => {
   renderThirdPlaceChoices();
   renderEntriesTable();
   renderLeaderboard();
+  saveEntryToFirebase(entry);
   saveApp();
 });
 
@@ -290,7 +303,146 @@ function normalizeResultsGroups(value) {
 
 function saveApp() {
   localStorage.setItem(appKey, JSON.stringify(appState));
+  if (!firebaseStatus.applyingRemote) {
+    saveToFirebase();
+  }
   updateAutomationDashboard();
+}
+
+function initializeFirebaseSync() {
+  const config = window.TRU_FIREBASE_CONFIG || {};
+  const hasConfig = Boolean(config.apiKey && config.projectId && window.firebase?.initializeApp);
+  if (!hasConfig) {
+    setStatus("Local mode: paste Firebase config to sync across computers.");
+    return;
+  }
+
+  try {
+    firebase.initializeApp(config);
+  } catch (error) {
+    if (!String(error?.message || "").includes("already exists")) {
+      setStatus("Firebase could not start. Check the config values.", true);
+      return;
+    }
+  }
+
+  firebaseStatus.enabled = true;
+  firebaseStatus.db = firebase.firestore();
+  firebaseStatus.trackerId = window.TRU_FIREBASE_TRACKER_ID || firebaseStatus.trackerId;
+  setStatus("Firebase connected. Syncing tracker data...");
+  syncLocalEntriesToFirebase();
+  listenToFirebaseEntries();
+  listenToFirebaseResults();
+  saveResultsToFirebase();
+}
+
+function trackerRef() {
+  return firebaseStatus.db.collection("trackers").doc(firebaseStatus.trackerId);
+}
+
+function entriesRef() {
+  return trackerRef().collection("entries");
+}
+
+function saveToFirebase() {
+  if (!firebaseStatus.db) return;
+  saveResultsToFirebase();
+}
+
+function syncLocalEntriesToFirebase() {
+  if (!firebaseStatus.db) return;
+  appState.entries.forEach((entry) => {
+    entriesRef().doc(entry.id).set(cleanForFirestore(entry), { merge: true });
+  });
+}
+
+function saveEntryToFirebase(entry) {
+  if (!firebaseStatus.db) return;
+  firebaseStatus.ignoreNextRemoteEntries = true;
+  entriesRef().doc(entry.id).set(cleanForFirestore(entry), { merge: true }).catch(() => {
+    setStatus("Entry saved locally, but Firebase sync failed.", true);
+  });
+}
+
+function saveResultsToFirebase() {
+  if (!firebaseStatus.db) return;
+  firebaseStatus.ignoreNextRemoteResults = true;
+  trackerRef()
+    .set(
+      {
+        results: cleanForFirestore(appState.results),
+        updatedAt: new Date().toISOString(),
+      },
+      { merge: true }
+    )
+    .catch(() => setStatus("Results saved locally, but Firebase sync failed.", true));
+}
+
+function listenToFirebaseEntries() {
+  firebaseStatus.entriesUnsubscribe = entriesRef().onSnapshot(
+    (snapshot) => {
+      firebaseStatus.applyingRemote = true;
+      if (firebaseStatus.ignoreNextRemoteEntries) {
+        firebaseStatus.ignoreNextRemoteEntries = false;
+      }
+      const remoteEntries = [];
+      snapshot.forEach((doc) => {
+        remoteEntries.push({ id: doc.id, ...doc.data() });
+      });
+      const mergedEntries = mergeEntries(appState.entries, remoteEntries);
+      appState.entries = normalizeState({ ...appState, entries: mergedEntries }).entries;
+      firebaseStatus.ready = true;
+      localStorage.setItem(appKey, JSON.stringify(appState));
+      renderEntriesTable();
+      renderLeaderboard();
+      updateAutomationDashboard();
+      setStatus("Firebase sync active. Entries are shared across computers.");
+      syncLocalEntriesToFirebase();
+      firebaseStatus.applyingRemote = false;
+    },
+    () => setStatus("Could not read Firebase entries. Check Firestore rules.", true)
+  );
+}
+
+function listenToFirebaseResults() {
+  firebaseStatus.resultsUnsubscribe = trackerRef().onSnapshot(
+    (doc) => {
+      firebaseStatus.applyingRemote = true;
+      if (firebaseStatus.ignoreNextRemoteResults) {
+        firebaseStatus.ignoreNextRemoteResults = false;
+      }
+      const data = doc.data();
+      if (!data?.results) {
+        firebaseStatus.ready = true;
+        firebaseStatus.applyingRemote = false;
+        return;
+      }
+      appState.results = normalizeState({ ...appState, results: data.results }).results;
+      firebaseStatus.ready = true;
+      localStorage.setItem(appKey, JSON.stringify(appState));
+      renderResults();
+      renderEntriesTable();
+      renderLeaderboard();
+      updateAutomationDashboard();
+      firebaseStatus.applyingRemote = false;
+    },
+    () => setStatus("Could not read Firebase results. Check Firestore rules.", true)
+  );
+}
+
+function mergeEntries(localEntries, remoteEntries) {
+  const merged = new Map();
+  [...remoteEntries, ...localEntries].forEach((entry) => {
+    const existing = merged.get(entry.id);
+    if (!existing || new Date(entry.updatedAt || entry.submittedAt || 0) >= new Date(existing.updatedAt || existing.submittedAt || 0)) {
+      merged.set(entry.id, entry);
+    }
+  });
+  return [...merged.values()];
+}
+
+function cleanForFirestore(value) {
+  return JSON.parse(JSON.stringify(value));
 }
 
 function renderTeamOptions() {
@@ -303,7 +455,7 @@ function renderTeamOptions() {
 function hydrateDraftFields() {
   playerName.value = appState.draft.playerName || "";
   rootingFor.value = appState.draft.rootingFor || "";
-  saveEntryButton.textContent = appState.draft.id ? "Update Entry" : "Submit Entry";
+  saveEntryButton.textContent = appState.draft.id ? "Update Staff Entry" : "Save Staff Entry";
 }
 
 function renderPickGroups() {
@@ -430,7 +582,6 @@ function renderEntriesTable() {
       <td><strong>${score.total}</strong></td>
       <td class="row-actions">
         <button type="button" data-action="edit" data-id="${entry.id}">Edit</button>
-        <button type="button" data-action="delete" data-id="${entry.id}">Delete</button>
       </td>
     `;
     entriesTable.appendChild(row);
@@ -447,12 +598,6 @@ function renderEntriesTable() {
         renderThirdPlaceChoices();
         setStatus(`Editing ${entry.playerName}'s entry.`);
         window.scrollTo({ top: 0, behavior: "smooth" });
-      } else {
-        appState.entries = appState.entries.filter((item) => item.id !== entry.id);
-        renderEntriesTable();
-        renderLeaderboard();
-        saveApp();
-        setStatus(`${entry.playerName}'s entry was removed.`);
       }
     });
   });
@@ -549,9 +694,8 @@ function renderActualThirdPlaceChoices() {
 }
 
 function validateDraft() {
-  if (isEntryLocked()) return "Entries are locked because the group stage has started.";
-  if (!appState.draft.playerName) return "Enter the staff member's name before submitting.";
-  if (appState.draft.advancingThird.length !== 8) return "Select exactly eight third-place teams before submitting.";
+  if (!appState.draft.playerName) return "Enter the staff member's name before saving.";
+  if (appState.draft.advancingThird.length !== 8) return "Select exactly eight third-place teams before saving.";
   return "";
 }
 
@@ -669,30 +813,25 @@ function updateAutomationDashboard() {
   const scored = scoreEntries();
   const filledResults = Object.values(appState.results.finishes).flat().filter(Boolean).length;
   const resultPercent = Math.round((filledResults / 48) * 100);
-  const locked = isEntryLocked();
   const timeLeft = challengeLockDate.getTime() - Date.now();
 
   entryCount.textContent = appState.entries.length;
   resultsProgress.textContent = `${resultPercent}%`;
   leaderName.textContent = scored[0] ? `${scored[0].entry.playerName} (${scored[0].score.total} pts)` : "No entries yet";
   runnerName.textContent = scored[1] ? `${scored[1].entry.playerName} (${scored[1].score.total} pts)` : "No entries yet";
-  entryMode.textContent = locked ? "Locked" : "Open";
-  challengeStatus.textContent = locked ? "Entries locked - group stage underway" : "Entries open - auto-saved";
-  saveEntryButton.disabled = locked;
-  saveEntryButton.textContent = locked ? "Entries Locked" : appState.draft.id ? "Update Entry" : "Submit Entry";
+  entryMode.textContent = "Manager Only";
+  challengeStatus.textContent = "Manager tracker ready";
+  saveEntryButton.disabled = false;
+  saveEntryButton.textContent = appState.draft.id ? "Update Staff Entry" : "Save Staff Entry";
 
   if (timeLeft <= 0) {
-    countdown.textContent = "Locked";
+    countdown.textContent = "Started";
     return;
   }
 
   const days = Math.floor(timeLeft / 86400000);
   const hours = Math.floor((timeLeft % 86400000) / 3600000);
   countdown.textContent = `${days}d ${hours}h`;
-}
-
-function isEntryLocked() {
-  return Date.now() >= challengeLockDate.getTime();
 }
 
 function setStatus(message, isError = false) {

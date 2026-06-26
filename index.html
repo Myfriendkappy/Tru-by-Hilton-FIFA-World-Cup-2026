@@ -12,7 +12,7 @@
         <div class="brand-mark" aria-hidden="true">tru</div>
         <div>
           <p class="eyebrow">by Hilton Orlando Convention Center</p>
-          <h1>FIFA World Cup 2026 Staff Bracket Challenge</h1>
+          <h1>FIFA World Cup 2026 Bracket Tracker</h1>
         </div>
       </div>
       <div class="prize-strip" aria-label="Challenge prizes">
@@ -24,10 +24,10 @@
     <main>
       <section class="hero">
         <div class="hero-copy">
-          <p class="date" id="challengeStatus">Entries open</p>
-          <h2><span>FIFA</span> <span>World Cup 2026</span> <mark>Staff Bracket Challenge!</mark></h2>
+          <p class="date" id="challengeStatus">Manager tracker ready</p>
+          <h2><span>FIFA</span> <span>World Cup 2026</span> <mark>Staff Pick Tracker</mark></h2>
           <p>
-            Think you know soccer? Join the fun, compete against fellow team members, and let the app track every pick, point, winner, and runner-up automatically.
+            Enter each staff member's picks yourself, save every bracket in one place, then let the app track points, leaders, winners, and runner-up prizes automatically.
           </p>
         </div>
         <div class="hero-ball" aria-hidden="true">⚽</div>
@@ -37,7 +37,7 @@
           <dl>
             <div><dt>Entries</dt><dd id="entryCount">0</dd></div>
             <div><dt>Results complete</dt><dd id="resultsProgress">0%</dd></div>
-            <div><dt>Time until lock</dt><dd id="countdown">--</dd></div>
+            <div><dt>Days to kickoff</dt><dd id="countdown">--</dd></div>
             <div><dt>Auto scoring</dt><dd>On</dd></div>
           </dl>
         </div>
@@ -57,13 +57,13 @@
           <strong>$100 winner / $50 runner-up</strong>
         </article>
         <article>
-          <span>Deadline</span>
-          <strong id="entryMode">Open</strong>
+          <span>Input Mode</span>
+          <strong id="entryMode">Manager Only</strong>
         </article>
       </section>
 
       <nav class="tabs" aria-label="Challenge sections">
-        <button class="tab active" type="button" data-tab="entry">Staff Entries</button>
+        <button class="tab active" type="button" data-tab="entry">Entry Manager</button>
         <button class="tab" type="button" data-tab="score">Automated Scoreboard</button>
         <button class="tab" type="button" data-tab="knockout">Knockout Round</button>
       </nav>
@@ -71,19 +71,19 @@
       <section id="entry" class="panel active" aria-labelledby="entry-heading">
         <div class="section-head">
           <div>
-            <p class="eyebrow">Step 1</p>
-            <h2 id="entry-heading">Group Stage Picks</h2>
+            <p class="eyebrow">Manager Input</p>
+            <h2 id="entry-heading">Enter Staff Picks</h2>
           </div>
           <div class="actions">
             <button type="button" id="newEntry">New Entry</button>
             <button type="button" id="resetPicks">Reset</button>
-            <button type="button" id="saveEntry" class="primary">Submit Entry</button>
+            <button type="button" id="saveEntry" class="primary">Save Staff Entry</button>
           </div>
         </div>
 
         <div class="entry-fields">
           <label class="name-field">
-            <span>Staff member</span>
+            <span>Staff member name</span>
             <input id="playerName" type="text" placeholder="Enter name">
           </label>
           <label class="name-field">
@@ -108,8 +108,8 @@
         <div class="advance-box">
           <div class="section-head nested">
             <div>
-              <p class="eyebrow">Saved Entries</p>
-              <h2>Staff Entries</h2>
+              <p class="eyebrow">Tracker</p>
+              <h2>Saved Staff Picks</h2>
             </div>
             <button type="button" id="exportEntries">Export CSV</button>
           </div>
@@ -141,7 +141,7 @@
           </div>
         </div>
         <p class="muted">
-          Enter the actual group finishes after the group stage. The app compares results to every saved staff entry and updates the leaderboard automatically.
+          Enter the actual group finishes after the group stage. The app compares results to every staff pick you saved and updates the leaderboard automatically.
         </p>
         <div class="score-layout">
           <div>
@@ -178,7 +178,10 @@
             <p class="eyebrow">Second Challenge</p>
             <h2 id="knockout-heading">Knockout Bracket Plan</h2>
           </div>
-          <button type="button" id="printKnockout" class="primary">Print Rules</button>
+          <div class="actions">
+            <a class="primary top-link" href="knockout.html">Open Knockout App</a>
+            <button type="button" id="printKnockout" class="primary">Print Rules</button>
+          </div>
         </div>
         <div class="rounds">
           <article>
@@ -215,6 +218,9 @@
       </article>
     </template>
 
+    <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
     <script src="app.js"></script>
   </body>
 </html>
