@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Tru World Cup Challenge Results</title>
+    <link rel="stylesheet" href="results.css">
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand-lockup">
+        <div class="brand-mark" aria-hidden="true">tru</div>
+        <div>
+          <p>by Hilton Orlando Convention Center</p>
+          <h1>FIFA World Cup 2026 Challenge Results</h1>
+        </div>
+      </div>
+      <div class="actions">
+        <a href="index.html">Group Tracker</a>
+        <a href="knockout.html">Knockout App</a>
+        <button type="button" id="printPage">Print Results</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero">
+        <p id="syncStatus">Loading results...</p>
+        <h2>Official Results Summary</h2>
+        <div class="summary-grid">
+          <article>
+            <span>Group Entries</span>
+            <strong id="groupEntryCount">0</strong>
+          </article>
+          <article>
+            <span>Knockout Entries</span>
+            <strong id="knockoutEntryCount">0</strong>
+          </article>
+          <article>
+            <span>Group Winner</span>
+            <strong id="groupWinner">Pending</strong>
+          </article>
+          <article>
+            <span>Knockout Winner</span>
+            <strong id="knockoutWinner">Pending</strong>
+          </article>
+        </div>
+      </section>
+
+      <section class="print-section">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Group Stage</p>
+            <h2>Leaderboard</h2>
+          </div>
+          <p class="prize">$100 winner / $50 runner-up</p>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Place</th>
+              <th>Name</th>
+              <th>Rooting For</th>
+              <th>Exact Picks</th>
+              <th>Perfect Groups</th>
+              <th>3rd-Place Pts</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody id="groupRows"></tbody>
+        </table>
+      </section>
+
+      <section class="print-section">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Knockout Stage</p>
+            <h2>Leaderboard</h2>
+          </div>
+          <p class="prize">$100 winner / $50 runner-up</p>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Place</th>
+              <th>Name</th>
+              <th>Champion Pick</th>
+              <th>R32</th>
+              <th>R16</th>
+              <th>QF</th>
+              <th>SF</th>
+              <th>Final</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody id="knockoutRows"></tbody>
+        </table>
+      </section>
+
+      <section class="print-section">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Official</p>
+            <h2>Knockout Winners Entered</h2>
+          </div>
+        </div>
+        <div class="official-grid" id="officialKnockout"></div>
+      </section>
+    </main>
+
+    <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="results.js"></script>
+  </body>
+</html>
